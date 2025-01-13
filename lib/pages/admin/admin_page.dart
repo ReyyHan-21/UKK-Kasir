@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pl2_kasir/pages/admin/dashboard.dart';
 import 'package:pl2_kasir/pages/component/appbar.dart';
-import 'package:pl2_kasir/pages/list_item.dart';
+import 'package:pl2_kasir/pages/admin/list_item.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
