@@ -15,6 +15,10 @@ class _ListItemState extends State<ListItem> {
   final TextEditingController priceController = TextEditingController();
   final TextEditingController stockController = TextEditingController();
 
+  late TextEditingController _nameController;
+  late TextEditingController _priceController;
+  late TextEditingController _stockController;
+
   final SupabaseClient supabase = Supabase.instance.client;
 
   // Fungsi untuk mengambil data dari Supabase
@@ -39,6 +43,8 @@ class _ListItemState extends State<ListItem> {
     }
   }
 
+  Future<void> editProduct() async {}
+
   // Fungsi untuk menambah data ke Supabase
   Future<void> createProduct(String name, String price, String stock) async {
     try {
@@ -50,11 +56,15 @@ class _ListItemState extends State<ListItem> {
 
       await fetchProducts(); // Ambil ulang data setelah penambahan
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Produk berhasil ditambahkan')),
+        const SnackBar(
+          content: Text('Produk berhasil ditambahkan'),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menambah produk: $e')),
+        SnackBar(
+          content: Text('Gagal menambah produk: $e'),
+        ),
       );
     }
   }
@@ -62,7 +72,14 @@ class _ListItemState extends State<ListItem> {
   @override
   void initState() {
     super.initState();
+    // _nameController = TextEditingController(text: widget.product['']);
+
     fetchProducts(); // Ambil data saat pertama kali widget dimuat
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -192,4 +209,7 @@ class _ListItemState extends State<ListItem> {
       },
     );
   }
+
+  void showEditDialog() {}
 }
+

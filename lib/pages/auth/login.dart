@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pl2_kasir/pages/admin/admin_page.dart';
+import 'package:pl2_kasir/pages/admin/route_page.dart';
 import 'package:pl2_kasir/pages/auth/auth_handler.dart'; // Pastikan kelas ini sudah benar
 
 class Login extends StatefulWidget {
@@ -33,7 +33,7 @@ class _LoginState extends State<Login> {
         // Lakukan navigasi ke halaman berikutnya setelah login berhasil
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const AdminPage()),
+          MaterialPageRoute(builder: (context) => const routePage()),
         );
       } else {
         // Menangani kondisi jika email atau password salah

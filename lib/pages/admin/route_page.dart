@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:pl2_kasir/pages/admin/dashboard.dart';
 import 'package:pl2_kasir/pages/component/appbar.dart';
-import 'package:pl2_kasir/pages/component/list_item.dart';
+import 'package:pl2_kasir/pages/admin/list_item.dart';
+import 'package:pl2_kasir/pages/component/botNavbar.dart';
 
-class AdminPage extends StatefulWidget {
-  const AdminPage({super.key});
+class routePage extends StatefulWidget {
+  const routePage({super.key});
 
   @override
-  State<AdminPage> createState() => _AdminPageState();
+  State<routePage> createState() => _routePageState();
 }
 
-class _AdminPageState extends State<AdminPage> {
+class _routePageState extends State<routePage> {
   // Indeks halaman aktif
   int _selectedIndex = 0;
 
@@ -34,6 +35,11 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
@@ -46,23 +52,9 @@ class _AdminPageState extends State<AdminPage> {
         ),
       ),
       body: _pages[_selectedIndex], // Menampilkan halaman sesuai indeks
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex, // Indeks aktif
-        onTap: _onItemTapped, // Fungsi yang dipanggil saat item diklik
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.library_books_rounded),
-            label: 'List Product',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people_alt),
-            label: 'Account',
-          ),
-        ],
+      bottomNavigationBar: Botnavbar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

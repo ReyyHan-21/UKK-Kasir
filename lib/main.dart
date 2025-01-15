@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pl2_kasir/pages/admin/admin_page.dart';
+import 'package:pl2_kasir/pages/admin/route_page.dart';
 import 'package:pl2_kasir/pages/auth/login.dart';
 import 'package:pl2_kasir/pages/auth/seeder.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AdminPage(),
+      home: routePage(),
     );
   }
 }
