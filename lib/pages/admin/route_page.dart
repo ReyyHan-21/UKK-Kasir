@@ -18,7 +18,9 @@ class _routePageState extends State<routePage> {
   // Daftar halaman
   final List<Widget> _pages = [
     const Dashboard(),
-    const ListItem(),
+    const ListItem(
+      product: {},
+    ),
     const Center(
       child: Text(
         'Account Page Content',

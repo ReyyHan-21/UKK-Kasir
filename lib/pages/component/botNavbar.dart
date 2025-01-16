@@ -4,7 +4,11 @@ class Botnavbar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  const Botnavbar({super.key, required this.currentIndex, required this.onTap});
+  const Botnavbar({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

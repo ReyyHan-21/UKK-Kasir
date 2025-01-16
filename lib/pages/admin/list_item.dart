@@ -3,21 +3,26 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ListItem extends StatefulWidget {
-  const ListItem({super.key});
+  final Map<String, dynamic> product;
+
+  const ListItem({Key? key, required this.product}) : super(key: key);
 
   @override
   State<ListItem> createState() => _ListItemState();
 }
 
 class _ListItemState extends State<ListItem> {
+  // Add Data To Supabase
   final List<Map<String, dynamic>> products = [];
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController priceController = TextEditingController();
-  final TextEditingController stockController = TextEditingController();
+  late TextEditingController nameController = TextEditingController();
+  late TextEditingController priceController = TextEditingController();
+  late TextEditingController stockController = TextEditingController();
 
-  late TextEditingController _nameController;
-  late TextEditingController _priceController;
-  late TextEditingController _stockController;
+  // Edit Data
+  final _formKey = GlobalKey<FormState>();
+  // late TextEditingController _nameController;
+  // late TextEditingController _priceController;
+  // late TextEditingController _stockController;
 
   final SupabaseClient supabase = Supabase.instance.client;
 
@@ -43,7 +48,44 @@ class _ListItemState extends State<ListItem> {
     }
   }
 
-  Future<void> editProduct() async {}
+  // Fungsi untuk edit barang
+  Future<void> editProduct() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    final name = nameController.text;
+    final price = priceController.text;
+    final stock = stockController.text;
+
+    final response = await Supabase.instance.client
+        .from('product')
+        .update({
+          'name': name,
+          'price': price,
+          'stock': stock,
+        })
+        .eq('product_id', widget.product['product_id'])
+        .select();
+
+    if (response == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erorr Kang'),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Berhasil Kang'),
+        ),
+      );
+      Navigator.pop(
+        context,
+        true,
+      );
+    }
+  }
 
   // Fungsi untuk menambah data ke Supabase
   Future<void> createProduct(String name, String price, String stock) async {
@@ -72,7 +114,9 @@ class _ListItemState extends State<ListItem> {
   @override
   void initState() {
     super.initState();
-    // _nameController = TextEditingController(text: widget.product['']);
+    nameController = TextEditingController(text: widget.product['nama_product']);
+    priceController = TextEditingController(text: widget.product['harga']);
+    stockController = TextEditingController(text: widget.product['stock']);
 
     fetchProducts(); // Ambil data saat pertama kali widget dimuat
   }
@@ -119,7 +163,7 @@ class _ListItemState extends State<ListItem> {
                           'Harga: ${products[index]['price']} || Stok: ${products[index]['stock']}',
                         ),
                         trailing: IconButton(
-                          onPressed: () {},
+                          onPressed: showEditDialog,
                           icon: const Icon(Icons.edit),
                         ),
                       ),
@@ -172,7 +216,7 @@ class _ListItemState extends State<ListItem> {
               TextField(
                 controller: stockController,
                 decoration: const InputDecoration(
-                  labelText: 'Stok Produk',
+                  labelText: 'Stock Produk',
                   icon: Icon(Icons.production_quantity_limits),
                 ),
                 keyboardType: TextInputType.number,
@@ -210,6 +254,68 @@ class _ListItemState extends State<ListItem> {
     );
   }
 
-  void showEditDialog() {}
+  void showEditDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Data Barang'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nama Produk',
+                  icon: Icon(Icons.label),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the field';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: priceController,
+                decoration: const InputDecoration(
+                  labelText: 'Harga Produk',
+                  icon: Icon(Icons.price_change),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the field';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: stockController,
+                decoration: const InputDecoration(
+                  labelText: 'Stock Produk',
+                  icon: Icon(Icons.production_quantity_limits),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the field';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: editProduct,
+              child: const Text('Simpan'),
+            )
+          ],
+        );
+      },
+    );
+  }
 }
-
