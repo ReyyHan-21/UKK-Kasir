@@ -22,10 +22,7 @@ class _routePageState extends State<routePage> {
       product: {},
     ),
     const Center(
-      child: Text(
-        'Account Page Content',
-        style: TextStyle(fontSize: 24),
-      ),
+      child: CircularProgressIndicator(),
     ),
   ];
 

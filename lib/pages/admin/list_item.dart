@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pl2_kasir/pages/component/edit_item.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ListItem extends StatefulWidget {
   final Map<String, dynamic> product;
 
-  const ListItem({Key? key, required this.product}) : super(key: key);
+  const ListItem({super.key, required this.product});
 
   @override
   State<ListItem> createState() => _ListItemState();
@@ -13,28 +14,23 @@ class ListItem extends StatefulWidget {
 
 class _ListItemState extends State<ListItem> {
   // Add Data To Supabase
-  final List<Map<String, dynamic>> products = [];
+  final List<Map<String, dynamic>> product = [];
   late TextEditingController nameController = TextEditingController();
   late TextEditingController priceController = TextEditingController();
   late TextEditingController stockController = TextEditingController();
-
-  // Edit Data
-  final _formKey = GlobalKey<FormState>();
-  // late TextEditingController _nameController;
-  // late TextEditingController _priceController;
-  // late TextEditingController _stockController;
 
   final SupabaseClient supabase = Supabase.instance.client;
 
   // Fungsi untuk mengambil data dari Supabase
   Future<void> fetchProducts() async {
     try {
-      final List<dynamic> response = await supabase.from('product').select();
+      final response = await supabase.from('product').select();
 
       setState(() {
-        products.clear();
-        products.addAll(response.map((product) {
+        product.clear();
+        product.addAll((response as List<dynamic>).map((product) {
           return {
+            'id': product['product_id'],
             'name': product['nama_product'],
             'price': product['harga'],
             'stock': product['stock'],
@@ -44,45 +40,6 @@ class _ListItemState extends State<ListItem> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal mengambil produk: $e')),
-      );
-    }
-  }
-
-  // Fungsi untuk edit barang
-  Future<void> editProduct() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    final name = nameController.text;
-    final price = priceController.text;
-    final stock = stockController.text;
-
-    final response = await Supabase.instance.client
-        .from('product')
-        .update({
-          'name': name,
-          'price': price,
-          'stock': stock,
-        })
-        .eq('product_id', widget.product['product_id'])
-        .select();
-
-    if (response == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erorr Kang'),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Berhasil Kang'),
-        ),
-      );
-      Navigator.pop(
-        context,
-        true,
       );
     }
   }
@@ -111,13 +68,32 @@ class _ListItemState extends State<ListItem> {
     }
   }
 
+  // Fungsi untuk menghapus data dari Supabase
+  Future<void> deleteProduct(int id) async {
+    try {
+      // Pastikan id bertipe int
+      await supabase.from('product').delete().eq('product_id', id);
+
+      // Refresh data setelah penghapusan
+      await fetchProducts();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Produk berhasil dihapus'),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menghapus produk: $e'),
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.product['nama_product']);
-    priceController = TextEditingController(text: widget.product['harga']);
-    stockController = TextEditingController(text: widget.product['stock']);
-
     fetchProducts(); // Ambil data saat pertama kali widget dimuat
   }
 
@@ -152,19 +128,50 @@ class _ListItemState extends State<ListItem> {
             const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
-                itemCount: products.length,
+                itemCount: product.length,
                 itemBuilder: (context, index) {
                   return Column(
                     children: [
                       ListTile(
                         leading: const Icon(Icons.coffee),
-                        title: Text(products[index]['name'] ?? 'Nama Produk'),
+                        title: Text(product[index]['name'] ?? 'Nama Produk'),
                         subtitle: Text(
-                          'Harga: ${products[index]['price']} || Stok: ${products[index]['stock']}',
+                          'Harga: ${product[index]['price']} || Stok: ${product[index]['stock']}',
                         ),
-                        trailing: IconButton(
-                          onPressed: showEditDialog,
-                          icon: const Icon(Icons.edit),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () async {
+                                final updatedProduct =
+                                    await showDialog<Map<String, dynamic>>(
+                                  context: context,
+                                  builder: (context) => EditProductDialog(
+                                    product: product[index],
+                                  ),
+                                );
+                                if (updatedProduct != null) {
+                                  setState(() {
+                                    product[index] = updatedProduct;
+                                  });
+                                  await fetchProducts(); // Refresh data setelah pengeditan
+                                }
+                              },
+                              icon: const Icon(Icons.edit),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                final int productId = int.parse(product[index]
+                                        ['id']
+                                    .toString()); // Konversi ke integer
+                                showDeleteConfirmationDialog(productId);
+                              },
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                              ),
+                            )
+                          ],
                         ),
                       ),
                       const Divider(
@@ -254,65 +261,34 @@ class _ListItemState extends State<ListItem> {
     );
   }
 
-  void showEditDialog() {
+  // Delete Product
+  void showDeleteConfirmationDialog(int id) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit Data Barang'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama Produk',
-                  icon: Icon(Icons.label),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the field';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: priceController,
-                decoration: const InputDecoration(
-                  labelText: 'Harga Produk',
-                  icon: Icon(Icons.price_change),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the field';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: stockController,
-                decoration: const InputDecoration(
-                  labelText: 'Stock Produk',
-                  icon: Icon(Icons.production_quantity_limits),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the field';
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
+          title: const Text('Hapus Produk'),
+          content: const Text('Apakah Anda yakin ingin menghapus produk ini?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Batal'),
             ),
             ElevatedButton(
-              onPressed: editProduct,
-              child: const Text('Simpan'),
-            )
+              onPressed: () {
+                deleteProduct(id); // Pastikan id adalah integer
+                Navigator.of(context).pop(); // Tutup dialog
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Warna tombol hapus
+              ),
+              child: Text(
+                'Hapus',
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                ),
+              ),
+            ),
           ],
         );
       },
