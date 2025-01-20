@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pl2_kasir/pages/admin/account.dart';
 import 'package:pl2_kasir/pages/admin/dashboard.dart';
 import 'package:pl2_kasir/pages/component/appbar.dart';
 import 'package:pl2_kasir/pages/admin/list_item.dart';
@@ -21,9 +22,7 @@ class _routePageState extends State<routePage> {
     const ListItem(
       product: {},
     ),
-    const Center(
-      child: CircularProgressIndicator(),
-    ),
+    const Account(),
   ];
 
   // Fungsi untuk mengubah halaman
@@ -41,15 +40,18 @@ class _routePageState extends State<routePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: AppsBar(
-          customIcon: IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.shopping_cart),
-          ),
-        ),
-      ),
+      appBar: _selectedIndex != 2
+          ? // Menampilkan AppBar khusus untuk halaman lain selain Account
+          PreferredSize(
+              preferredSize: const Size.fromHeight(60),
+              child: AppsBar(
+                customIcon: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.shopping_cart),
+                ),
+              ),
+            )
+          : null, // null jika halaman Account
       body: _pages[_selectedIndex], // Menampilkan halaman sesuai indeks
       bottomNavigationBar: Botnavbar(
         currentIndex: _selectedIndex,

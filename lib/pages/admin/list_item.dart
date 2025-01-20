@@ -133,8 +133,16 @@ class _ListItemState extends State<ListItem> {
                   return Column(
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.coffee),
-                        title: Text(product[index]['name'] ?? 'Nama Produk'),
+                        leading: const Icon(
+                          Icons.coffee,
+                          color: Color(0xFF4E342E),
+                        ),
+                        title: Text(
+                          product[index]['name'] ?? 'Nama Produk',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w500
+                          ),
+                        ),
                         subtitle: Text(
                           'Harga: ${product[index]['price']} || Stok: ${product[index]['stock']}',
                         ),
@@ -166,10 +174,7 @@ class _ListItemState extends State<ListItem> {
                                     .toString()); // Konversi ke integer
                                 showDeleteConfirmationDialog(productId);
                               },
-                              icon: const Icon(
-                                Icons.delete,
-                                color: Colors.red,
-                              ),
+                              icon: const Icon(Icons.delete, color: Colors.red),
                             )
                           ],
                         ),
